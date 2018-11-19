@@ -21,6 +21,12 @@
     <ClInclude Include="Page.hpp">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="Frame.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="iterators.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">

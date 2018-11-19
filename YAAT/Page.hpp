@@ -1,81 +1,9 @@
 ﻿#pragma once
-#include <type_traits>
 #include <boost/noncopyable.hpp>
 #include <Windows.h>
 #include <assert.h>
-
-
-struct Frame
-{
-	enum Status
-	{
-		Raw, Written
-	};
-	struct Header
-	{
-		volatile Status status;
-	};
-	static constexpr int headerLength = sizeof(Header);
-};
-
-//为存放POD设计的迭代器
-template<typename T>
-class FrameIterator
-{
-public:
-	typedef T DataType;
-	static constexpr int contentLength = sizeof(T);
-	static constexpr int length = Frame::headerLength + contentLength;
-
-	//必不可少默认构造函数
-	FrameIterator() {}
-	FrameIterator(void * start)
-	{
-		static_assert(std::is_pod<T>::value, "only POD");
-		//不要使用成员初始化列表
-		m_header = reinterpret_cast<char*>(start);
-	}
-	inline Frame::Status status() const
-	{
-		return reinterpret_cast<Frame::Header*>(m_header)->status;
-	}
-	inline void markWritten()
-	{
-		reinterpret_cast<Frame::Header*>(m_header)->status = Frame::Status::Written;
-	}
-	inline T& operator*()
-	{
-		return *reinterpret_cast<T*>(m_header + Frame::headerLength);
-	}
-	//前置++效率更高
-	inline FrameIterator& operator++()
-	{
-		m_header += length;
-		return *this;
-	}
-	inline T* operator&()
-	{
-		return reinterpret_cast<T*>(m_header + Frame::headerLength);
-	}
-	inline bool operator!=(const FrameIterator<T>& second) const
-	{
-		return m_header != second.m_header;
-	}
-	inline bool operator!=(void* target) const
-	{
-		return m_header != target;
-	}
-	inline bool operator==(const FrameIterator<T>& second) const
-	{
-		return m_header == second.m_header;
-	}
-	inline bool operator==(void* target) const
-	{
-		return m_header == target;
-	}
-private:
-	char* m_header;
-};
+#include <string>
+#include "iterators.hpp"
 
 class PageBase :boost::noncopyable
 {
@@ -103,7 +31,6 @@ protected:
 	size_t m_size;
 	void* m_view;
 	void* m_handle;
-	void* m_endPtr;
 };
 
 template<typename T, bool write>
@@ -121,35 +48,15 @@ public:
 		assert(m_handle != nullptr);
 		m_view = MapViewOfFile(m_handle, FILE_MAP_WRITE, 0, 0, 0);
 		assert(m_view != nullptr);
-
-		m_endPtr = reinterpret_cast<char*>(m_view) + size;
-
-		m_iter = FrameIterator<T>{ m_view };
 	}
-	inline bool eof() const
+	WriteIterator<T> begin()
 	{
-		return m_iter.operator==(m_endPtr);
+		return WriteIterator<T>{m_view};
 	}
-	//不检查是否满，在外部循环检查
-	//这个接口是为请求式的API设计的，若是推送式的API可使用迭代器提供空间
-	//不要混合使用这个两种结构，迭代器状态并不同步
-	inline Page& operator<<(const typename FrameIterator<T>::DataType & data)
+	WriteIterator<T> end()
 	{
-		*m_iter = data;
-		m_iter.markWritten();
-		++m_iter;
-		return *this;
+		return WriteIterator<T>{(reinterpret_cast<char*>(m_view)+m_size)};
 	}
-	FrameIterator<T> begin()
-	{
-		return FrameIterator<T>{m_view};
-	}
-	FrameIterator<T> end()
-	{
-		return FrameIterator<T>{m_endPtr};
-	}
-private:
-	FrameIterator<T> m_iter;
 };
 
 template<typename T>
@@ -166,28 +73,15 @@ public:
 		MEMORY_BASIC_INFORMATION info;
 		VirtualQuery(m_view, &info, sizeof(MEMORY_BASIC_INFORMATION));
 		m_size = info.RegionSize;
-		m_endPtr = reinterpret_cast<char*>(m_view) + m_size;
-
-		m_iter = FrameIterator<T>{ m_view };
 	}
-	inline bool eof() const
+	ReadIterator<T> begin()
 	{
-		return m_iter.operator==(m_endPtr);
+		return ReadIterator<T>{m_view};
 	}
-	inline bool hasData() const
+	ReadIterator<T> end()
 	{
-		return m_iter.status() == Frame::Status::Written;
+		return ReadIterator<T>{(reinterpret_cast<char*>(m_view) + m_size)};
 	}
-
-	//不检查是否有数据，在外部循环检查
-	inline Page& operator>>(typename const FrameIterator<T>::DataType*& data)
-	{
-		data = &m_iter;
-		++m_iter;
-		return *this;
-	}
-private:
-	FrameIterator<T> m_iter;
 };
 
 template<typename T>
