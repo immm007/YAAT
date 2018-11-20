@@ -18,13 +18,10 @@
     <ClInclude Include="pch.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="Page.hpp">
+    <ClInclude Include="SharedMemory.hpp">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="Frame.hpp">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="iterators.hpp">
+    <ClInclude Include="Header.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
