@@ -18,13 +18,13 @@
     <ClInclude Include="pch.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="SinaQuoter.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="memory.hpp">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="iterator.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="sina.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
@@ -35,7 +35,7 @@
     <ClCompile Include="main.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="SinaQuoter.cpp">
+    <ClCompile Include="sina.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

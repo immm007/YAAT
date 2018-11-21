@@ -1,14 +1,16 @@
 #include "pch.h"
-#include "SinaQuoter.h"
-#include <boost\algorithm\string.hpp>
+#include "sina.h"
 #include <iostream>
+#include <boost\algorithm\string.hpp>
 
 
 using namespace std;
 using tcp = boost::asio::ip::tcp;
 namespace http = boost::beast::http;
 
-SinaQuoter::SinaQuoter() : _mem{"sina_quotation",4096}
+SinaQuoter::SinaQuoter() :
+	_wmem{ "sina_quotation",4096 },
+	_rmen {"sina_quotation"}
 {
 	_results = _resolver.resolve(_query);
 	_request.method(http::verb::get);
@@ -18,18 +20,19 @@ SinaQuoter::SinaQuoter() : _mem{"sina_quotation",4096}
 
 void SinaQuoter::subscribe(const string&  symbol)
 {
-	_symbols.push_back(addPrefix(symbol));
+	_symbols[symbol] = 0;
+	_prefixed_symbols.push_back(addPrefix(symbol));
 }
 
 void SinaQuoter::buildTarget()
 {
-	_target = "/list=" + boost::join(_symbols, ",");
+	_target = "/list=" + boost::join(_prefixed_symbols, ",");
 	_request.target(_target);
 }
 
 void SinaQuoter::writeQuotation()
 {
-	static auto iter = _mem.begin();
+	static auto iter = _wmem.begin();
 	boost::asio::connect(_socket,_results);
 	http::write(_socket, _request);
 	http::response<http::string_body> res;
@@ -39,7 +42,8 @@ void SinaQuoter::writeQuotation()
 	while (!sr.eof())
 	{
 		SinaRecord record = sr.next();
-		//std::cout << record.look();
+		//std::cout << sizeof(record);
+		//std::cout << record.look()
 		record.parseAndWrite(&iter);
 		++iter;
 	}
@@ -59,8 +63,14 @@ std::string SinaQuoter::addPrefix(const std::string& symbol)
 	}
 }
 
-inline void SinaRecord::parseAndWrite(Quotation* q)
+inline void SinaRecord::parseAndWrite(void* q)
 {
 	const char* m = find(_cbegin, _cend,'=');
-	std::memcpy(q, m - 6, 6);
+	char tmp[7];
+	memcpy(tmp, m - 6, 6);
+	tmp[6] = '\0';
+	string tmps{ tmp };
+
+	char dt[20]{ 0 };
+	memcpy(dt, _cend - 24,19);
 }

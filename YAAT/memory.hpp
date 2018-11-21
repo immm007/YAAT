@@ -31,7 +31,6 @@ public:
 		this->_view = MapViewOfFile(this->_handle, FILE_MAP_WRITE, 0, 0, 0);
 		assert(this->_view != nullptr);
 	}
-
 	WriteIterator<Header, T> begin()
 	{
 		return WriteIterator<Header, T>{this->_view};
@@ -51,5 +50,9 @@ public:
 
 		MEMORY_BASIC_INFORMATION info;
 		VirtualQuery(this->_view, &info, sizeof(MEMORY_BASIC_INFORMATION));
+	}
+	ReadIterator<Header, T> begin()
+	{
+		return ReadIterator<Header, T>{this->_view};
 	}
 };
