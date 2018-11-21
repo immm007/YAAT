@@ -1,13 +1,18 @@
 #pragma once
 #include <string>
 #include <vector>
+#include <boost\asio.hpp>
 #include <boost\beast.hpp>
-#include "SharedMemory.hpp"
+#include "memory.hpp"
 
 
 struct Header
 {
-	volatile int status;
+	enum MemoryStatus
+	{
+		Raw,Written
+	};
+	volatile MemoryStatus status;
 };
 
 struct Quotation
@@ -16,17 +21,67 @@ struct Quotation
 	float price;
 };
 
+//一对指针的包装，避免Quotation解析后返回产生一次复制
+class SinaRecord
+{
+public:
+	SinaRecord(const char* cbegin, const char* cend) :
+		_cbegin{ cbegin },
+		_cend{ cend }
+	{
+
+	}
+	//测试用
+	std::string look()
+	{
+		char tmp[255]{ 0 };
+		std::memcpy(tmp, _cbegin, _cend - _cbegin);
+		return tmp;
+	}
+	inline void parseAndWrite(Quotation* q);
+private:
+	const char* _cbegin;
+	const char* _cend;
+};
+
+//http response指针的封装，避免字符串额外复制
+class SinaResponse
+{
+public:
+	SinaResponse(const std::string& response) :
+		_cbegin{ response.c_str() },
+		_cend{ _cbegin + response.length() }
+	{
+
+	}
+	inline bool eof() const
+	{
+		//依赖于新浪行情回复倒数第二个字符一定是'\n'，省去每次next比较
+		return _cbegin == _cend-1;
+	}
+	//开销很小，两个指针
+	inline SinaRecord next()
+	{
+		const char* obegin = _cbegin;
+		_cbegin = std::find(_cbegin + 1, _cend, '\n');
+		return SinaRecord(obegin, _cbegin);
+	}
+private:
+	const char* _cbegin;
+	const char* _cend;
+};
 
 class SinaQuoter
 {
 public:
-	SinaQuoter(WriteOnlySharedMemory<Quotation, Header>& mem);
+	SinaQuoter();
 
 	void subscribe(const std::string& symbol);
 	void buildTarget();
 	void writeQuotation();
 private:
-	WriteOnlySharedMemory<Quotation, Header>& _mem;
+
+	WriteSharedMemory<Header, Quotation> _mem;
 	std::string _target;
 	std::vector<std::string> _symbols;
 	boost::asio::io_context _context;
@@ -39,52 +94,3 @@ private:
 	boost::beast::flat_buffer _buffer{ 4096 };
 };
 
-
-class SinaRecord
-{
-public:
-	SinaRecord(const char* cbegin,const char* cend) :
-		_cbegin{cbegin},
-		_cend{cend}
-	{
-
-	}
-	//测试用
-	std::string look()
-	{
-		char tmp[255]{0};
-		std::memcpy(tmp, _cbegin, _cend - _cbegin);
-		return tmp;
-	}
-private:
-	const char* _cbegin;
-	const char* _cend;
-};
-
-class SinaResponse
-{
-public:
-	SinaResponse(const std::string& response):
-		_cbegin{response.c_str()},
-		_cend{ _cbegin +response.length()}
-	{
-
-	}
-
-	inline bool next(SinaRecord& record)
-	{
-		const char* obegin = _cbegin;
-		_cbegin = std::find(_cbegin+1, _cend, '\n');
-		if (_cbegin == _cend)
-		{
-			return false;
-		}
-		else
-		{
-			record = SinaRecord(obegin, _cbegin);
-		}
-	}
-private:
-	const char* _cbegin;
-	const char* _cend;
-};

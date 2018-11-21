@@ -154,9 +154,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="Header.h" />
+    <ClInclude Include="iterator.hpp" />
     <ClInclude Include="pch.h" />
-    <ClInclude Include="SharedMemory.hpp" />
+    <ClInclude Include="memory.hpp" />
     <ClInclude Include="SinaQuoter.h" />
   </ItemGroup>
   <ItemGroup>

@@ -18,13 +18,13 @@
     <ClInclude Include="pch.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="SharedMemory.hpp">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="Header.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="SinaQuoter.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="memory.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="iterator.hpp">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
