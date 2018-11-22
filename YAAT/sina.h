@@ -18,11 +18,13 @@ struct Header
 struct Quotation
 {
 	char symbol[6];
-	long dt;
 	float open;
 	float close;
+	float price;
 	float high;
 	float low;
+	float bid;
+	float ask;
 	int volume;
 	float money;
 	int bvol1;
@@ -45,6 +47,7 @@ struct Quotation
 	float ask4;
 	int avol5;
 	float ask5;
+	char dt[19];
 };
 
 //一对指针的包装，避免Quotation解析后返回产生一次复制

@@ -42,11 +42,11 @@ public:
 		*reinterpret_cast<T*>(this->dataEntry()) = data;
 	}
 	//不会用在STL算法里，前置++更好用
-	inline MemoryIterator& operator++()
+	inline WriteIterator& operator++()
 	{
 		//我也不想放在++里面，但得兼容请求和推送接口
 		this->markWritten();
-		_header = (Header*)((char*)_header + length);
+		this->_header = (Header*)((char*)this->_header + this->length);
 		return *this;
 	}
 private:
@@ -65,7 +65,7 @@ public:
 
 	inline ReadIterator& operator++()
 	{
-		_header = (Header*)((char*)_header + length);
+		this->_header = (Header*)((char*)this->_header + this->length);
 		return *this;
 	}
 	//直接读共享内存，节省拷贝
@@ -80,6 +80,6 @@ public:
 private:
 	inline typename Header::MemoryStatus memoryStatus() const
 	{
-		return _header->status;
+		return this->_header->status;
 	}
 };
