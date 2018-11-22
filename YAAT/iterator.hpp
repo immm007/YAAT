@@ -10,6 +10,15 @@ class ReadSharedMemory;
 template<typename Header,typename T>
 class MemoryIterator
 {
+public:
+	inline bool operator==(const MemoryIterator& other)
+	{
+		return _header == other._header;
+	}
+	inline bool operator!=(const MemoryIterator& other)
+	{
+		return _header != other._header;
+	}
 protected:
 	static constexpr int headerLength = sizeof(Header);
 	static constexpr int contentLength = sizeof(T);
@@ -32,9 +41,9 @@ public:
 	friend class WriteSharedMemory<Header,T>;
 	using MemoryIterator<Header,T>::MemoryIterator;
 	//适用于请求式行情，解析过程中复制
-	inline void* operator&()
+	inline T* operator&()
 	{
-		return this->dataEntry();
+		return reinterpret_cast<T*>(this->dataEntry());
 	}
 	//适用于推送式行情
 	inline void operator=(const T& data)

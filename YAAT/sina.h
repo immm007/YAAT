@@ -17,6 +17,7 @@ struct Header
 
 struct Quotation
 {
+	char dt[19];
 	char symbol[6];
 	float open;
 	float close;
@@ -47,7 +48,6 @@ struct Quotation
 	float ask4;
 	int avol5;
 	float ask5;
-	char dt[19];
 };
 
 //一对指针的包装，避免Quotation解析后返回产生一次复制
@@ -67,7 +67,7 @@ public:
 		std::memcpy(tmp, _cbegin, _cend - _cbegin);
 		return tmp;
 	}
-	inline void parseAndWrite(void* q);
+	inline void parseAndWrite(Quotation* q);
 private:
 	const char* _cbegin;
 	const char* _cend;

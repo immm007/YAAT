@@ -63,14 +63,12 @@ std::string SinaQuoter::addPrefix(const std::string& symbol)
 	}
 }
 
-inline void SinaRecord::parseAndWrite(void* src)
+inline void SinaRecord::parseAndWrite(Quotation* q)
 {
-	Quotation q;
 	const char* m = find(_cbegin, _cend,',');
 	sscanf(m+1, "%f,%f,%f,%f,%f,%f,%f,%d,%f,%d,%f,%d,%f,%d,%f,%d,%f,%d,%f,%d,%f,%d,%f,%d,%f,%d,%f,%d,%f,%s",
-		&q.open, &q.close, &q.price, &q.high, &q.low, &q.bid, &q.ask, &q.volume, &q.money,
-		&q.bvol1,&q.bid1,&q.bvol2,&q.bid2, &q.bvol3, &q.bid3, &q.bvol4, &q.bid4, &q.bvol5, &q.bid5,
-		&q.avol1, &q.ask1, &q.avol2, &q.ask2, &q.avol3, &q.ask3, &q.avol4, &q.ask4, &q.avol5, &q.ask5,
-		&q.dt);
-	return;
+		&q->open, &q->close, &q->price, &q->high, &q->low, &q->bid, &q->ask, &q->volume, &q->money,
+		&q->bvol1,&q->bid1,&q->bvol2,&q->bid2, &q->bvol3, &q->bid3, &q->bvol4, &q->bid4, &q->bvol5, &q->bid5,
+		&q->avol1, &q->ask1, &q->avol2, &q->ask2, &q->avol3, &q->ask3, &q->avol4, &q->ask4, &q->avol5, &q->ask5,
+		&q->dt);
 }

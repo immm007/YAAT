@@ -16,13 +16,13 @@ int main()
 
 	const Quotation* pq;
 	ReadSharedMemory<Header, Quotation> m{ "sina_quotation" };
-	auto iter = m.begin();
+	auto iter = m.cbegin();
 	while (true)
 	{
 		pq = *iter;
 		if (pq)
 		{
-			cout << pq->symbol;
+			cout << sizeof(*pq);
 			++iter;
 		}
 	}

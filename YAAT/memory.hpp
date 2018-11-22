@@ -17,6 +17,7 @@ public:
 protected:
 	void* _view;
 	void* _handle;
+	int _size;
 };
 
 template<typename Header,typename T>
@@ -30,10 +31,16 @@ public:
 		assert(this->_handle != nullptr);
 		this->_view = MapViewOfFile(this->_handle, FILE_MAP_WRITE, 0, 0, 0);
 		assert(this->_view != nullptr);
+
+		this->_size = size;
 	}
 	WriteIterator<Header, T> begin()
 	{
 		return WriteIterator<Header, T>{this->_view};
+	}
+	WriteIterator<Header, T> end()
+	{
+		return WriteIterator<Header, T>{ reinterpret_cast<char*>(this->_view)+this->_size};
 	}
 };
 
@@ -50,8 +57,10 @@ public:
 
 		MEMORY_BASIC_INFORMATION info;
 		VirtualQuery(this->_view, &info, sizeof(MEMORY_BASIC_INFORMATION));
+
+		this->_size = size;
 	}
-	ReadIterator<Header, T> begin()
+	const ReadIterator<Header, T> cbegin() const
 	{
 		return ReadIterator<Header, T>{this->_view};
 	}
