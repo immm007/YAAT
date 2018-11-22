@@ -40,7 +40,7 @@ public:
 	}
 	WriteIterator<Header, T> end()
 	{
-		return WriteIterator<Header, T>{ reinterpret_cast<char*>(this->_view)+this->_size};
+		return WriteIterator<Header, T>{ reinterpret_cast<char*>(this->_view) + WriteIterator<Header, T>::length*(this->_size / WriteIterator<Header, T>::length) };
 	}
 };
 
@@ -58,7 +58,7 @@ public:
 		MEMORY_BASIC_INFORMATION info;
 		VirtualQuery(this->_view, &info, sizeof(MEMORY_BASIC_INFORMATION));
 
-		this->_size = size;
+		this->_size = info.RegionSize;
 	}
 	const ReadIterator<Header, T> cbegin() const
 	{

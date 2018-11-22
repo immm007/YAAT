@@ -67,7 +67,7 @@ public:
 		std::memcpy(tmp, _cbegin, _cend - _cbegin);
 		return tmp;
 	}
-	inline void parseAndWrite(Quotation* q);
+	inline bool parseAndWrite(Quotation* q);
 private:
 	const char* _cbegin;
 	const char* _cend;
@@ -107,10 +107,9 @@ public:
 	void subscribe(const std::string& symbol);
 	void buildTarget();
 	void writeQuotation();
+	static std::unordered_map<std::string, std::string> _symbols;
 private:
 	WriteSharedMemory<Header, Quotation> _wmem;
-	ReadSharedMemory<Header, Quotation> _rmen;
-	std::unordered_map<std::string, long> _symbols;
 	std::vector<std::string> _prefixed_symbols;
 	std::string _target;
 

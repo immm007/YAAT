@@ -27,6 +27,9 @@ protected:
 	MemoryIterator(void* p) :_header{ reinterpret_cast<Header*>(p) }
 	{
 	}
+	MemoryIterator(char* p) :_header{ reinterpret_cast<Header*>(p) }
+	{
+	}
 	inline void* dataEntry()
 	{
 		return reinterpret_cast<void*>(_header + 1);
