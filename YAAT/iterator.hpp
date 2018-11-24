@@ -81,8 +81,7 @@ public:
 		return *this;
 	}
 	//直接读共享内存，节省拷贝
-	inline const T* operator*()
-	{
+	inline const T* operator&() const	{
 		if (this->memoryStatus() == Header::MemoryStatus::Raw)
 		{
 			return nullptr;

@@ -13,6 +13,5 @@ int main()
 	q.subscribe("601965");
 	q.buildTarget();
 	q.writeQuotation();
-	cin.get();
 	return 0;
 }

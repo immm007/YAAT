@@ -17,7 +17,7 @@ struct Header
 
 struct Quotation
 {
-	char dt[19];
+	char dt[20];
 	char symbol[6];
 	float open;
 	float close;

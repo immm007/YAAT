@@ -47,13 +47,10 @@ void SinaQuoter::writeQuotation()
 		while (!sr.eof())
 		{
 			SinaRecord record = sr.next();
-			//std::cout << sizeof(record);
-			//std::cout << record.look()
 			bool r = record.parseAndWrite(&iter);
 			if (r)
 			{
 				++iter;
-				std::cout << i++ << endl;
 			}
 			if (iter == end)
 				return;
@@ -83,8 +80,9 @@ inline bool SinaRecord::parseAndWrite(Quotation* q)
 	if (dt> SinaQuoter::_symbols[symbol])
 	{
 		SinaQuoter::_symbols[symbol] = dt;
+		memcpy(q->symbol, symbol.c_str(), 6);
 		const char* m = find(_cbegin, _cend, ',');
-		sscanf(m + 1, "%f,%f,%f,%f,%f,%f,%f,%d,%f,%d,%f,%d,%f,%d,%f,%d,%f,%d,%f,%d,%f,%d,%f,%d,%f,%d,%f,%d,%f,%s",
+		sscanf(m + 1, "%f,%f,%f,%f,%f,%f,%f,%d,%f,%d,%f,%d,%f,%d,%f,%d,%f,%d,%f,%d,%f,%d,%f,%d,%f,%d,%f,%d,%f,%19s",
 			&q->open, &q->close, &q->price, &q->high, &q->low, &q->bid, &q->ask, &q->volume, &q->money,
 			&q->bvol1, &q->bid1, &q->bvol2, &q->bid2, &q->bvol3, &q->bid3, &q->bvol4, &q->bid4, &q->bvol5, &q->bid5,
 			&q->avol1, &q->ask1, &q->avol2, &q->ask2, &q->avol3, &q->ask3, &q->avol4, &q->ask4, &q->avol5, &q->ask5,
@@ -94,6 +92,5 @@ inline bool SinaRecord::parseAndWrite(Quotation* q)
 	else
 	{
 		return false;
-	}
-
+	} 
 }
