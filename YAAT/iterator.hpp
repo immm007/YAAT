@@ -1,4 +1,5 @@
 #pragma once
+#include <iterator>
 
 template<typename Header, typename T>
 class SMForWrite;
@@ -79,9 +80,8 @@ private:
 	using SMIterator<Header, T>::SMIterator;
 };
 
-//交易时间在线读取
 template<typename Header, typename T>
-class SMReadIterator :public SMIterator<Header, T>
+class SMReadIterator :public SMIterator<Header, T>,public std::iterator<std::forward_iterator_tag,T>
 {
 public:
 	friend class SMForRead<Header, T>;
@@ -93,6 +93,11 @@ public:
 			return nullptr;
 		}
 		return this->dataEntry();
+	}
+	//兼容STL算法
+	inline const T& operator*() const
+	{
+		return *(this->dataEntry());
 	}
 private:
 	using SMIterator<Header, T>::SMIterator;

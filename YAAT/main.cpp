@@ -1,8 +1,6 @@
 #include "pch.h"
 #include "sina.h"
 #include "memory.hpp"
-#include <ctime>
-
 
 using namespace sina;
 

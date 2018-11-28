@@ -103,11 +103,13 @@ namespace sina
 	class SinaQuoter
 	{
 	public:
+		static std::unordered_map<std::string, std::string> _symbols;
+
 		SinaQuoter();
 		void subscribe(const std::string& symbol);
 		void buildTarget();
 		void get(response<string_body>& res);
-		static std::unordered_map<std::string, std::string> _symbols;
+		bool isTradeTime() const;
 	private:
 		std::vector<std::string> _prefixed_symbols;
 		std::string _target;

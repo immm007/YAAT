@@ -33,6 +33,11 @@ void SinaQuoter::get(response<string_body>& res)
 	read(_socket, _buffer, res);
 }
 
+bool sina::SinaQuoter::isTradeTime() const
+{
+	return false;
+}
+
 std::string SinaQuoter::addPrefix(const std::string& symbol)
 {
 	switch (symbol[0])
