@@ -60,12 +60,4 @@ public:
 
 		this->_size = info.RegionSize;
 	}
-	const ReadIterator<Header, T> cbegin() const
-	{
-		return ReadIterator<Header, T>{this->_view};
-	}
-	const ReadIterator<Header, T> cend() const
-	{
-		return ReadIterator<Header, T>{ reinterpret_cast<char*>(this->_view) + ReadIterator<Header, T>::length*(this->_size / ReadIterator<Header, T>::length) };
-	}
 };

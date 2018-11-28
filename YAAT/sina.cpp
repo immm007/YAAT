@@ -1,6 +1,5 @@
 #include "pch.h"
 #include "sina.h"
-#include <iostream>
 #include <boost\algorithm\string.hpp>
 
 
@@ -11,7 +10,7 @@ namespace http = boost::beast::http;
 unordered_map<string, string> SinaQuoter::_symbols;
 
 SinaQuoter::SinaQuoter() :
-	_wmem{ "sina_quotation",4096 }
+	_wmem{ "sina_quotation",4096*100 }
 {
 	_results = _resolver.resolve(_query);
 	_request.method(http::verb::get);
@@ -50,6 +49,7 @@ void SinaQuoter::writeQuotation()
 			bool r = record.parseAndWrite(&iter);
 			if (r)
 			{
+				iter.markWritten();
 				++iter;
 			}
 			if (iter == end)

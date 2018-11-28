@@ -1,5 +1,6 @@
 #include "pch.h"
 #include <iostream>
+#include <fstream>
 #include "sina.h"
 
 
@@ -13,5 +14,5 @@ int main()
 	q.subscribe("601965");
 	q.buildTarget();
 	q.writeQuotation();
-	return 0;
+	cout << "full" << endl;
 }

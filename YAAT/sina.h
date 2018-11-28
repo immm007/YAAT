@@ -8,11 +8,11 @@
 
 struct Header
 {
-	enum MemoryStatus
+	enum Status
 	{
 		Raw,Written
 	};
-	volatile MemoryStatus status;
+	volatile Status status;
 };
 
 struct Quotation

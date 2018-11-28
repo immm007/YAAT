@@ -1,4 +1,5 @@
 #pragma once
+#include <iterator>
 
 template<typename Header, typename T>
 class WriteSharedMemory;
@@ -11,13 +12,28 @@ template<typename Header,typename T>
 class MemoryIterator
 {
 public:
-	inline bool operator==(const MemoryIterator& other)
+	inline typename Header::Status status() const
+	{
+		return this->_header->status;
+	}
+	inline bool operator==(const MemoryIterator& other) const
 	{
 		return _header == other._header;
 	}
-	inline bool operator!=(const MemoryIterator& other)
+	inline bool operator!=(const MemoryIterator& other) const
 	{
 		return _header != other._header;
+	}
+	inline MemoryIterator& operator++()
+	{
+		this->_header = (Header*)((char*)this->_header + this->length);
+		return *this;
+	}
+	inline MemoryIterator& operator++(int)
+	{
+		auto ret = *this;
+		this->operator++();
+		return ret;
 	}
 protected:
 	static constexpr int headerLength = sizeof(Header);
@@ -51,46 +67,42 @@ public:
 	//适用于推送式行情
 	inline void operator=(const T& data)
 	{
+		this->markWritten();
 		*reinterpret_cast<T*>(this->dataEntry()) = data;
 	}
-	//不会用在STL算法里，前置++更好用
-	inline WriteIterator& operator++()
-	{
-		//我也不想放在++里面，但得兼容请求和推送接口
-		this->markWritten();
-		this->_header = (Header*)((char*)this->_header + this->length);
-		return *this;
-	}
-private:
 	inline void markWritten()
 	{
-		this->_header->status = Header::MemoryStatus::Written;
+		this->_header->status = Header::Status::Written;
 	}
 };
 
 template<typename Header, typename T>
-class ReadIterator :public MemoryIterator<Header, T>
+class OnlineReadIterator :public MemoryIterator<Header, T>
 {
 public:
 	friend class ReadSharedMemory<Header, T>;
 	using MemoryIterator<Header, T>::MemoryIterator;
-
-	inline ReadIterator& operator++()
-	{
-		this->_header = (Header*)((char*)this->_header + this->length);
-		return *this;
-	}
 	//直接读共享内存，节省拷贝
-	inline const T* operator&() const	{
-		if (this->memoryStatus() == Header::MemoryStatus::Raw)
+	inline const T* operator&() const	
+	{
+		if (this->status() == Header::Status::Raw)
 		{
 			return nullptr;
 		}
 		return reinterpret_cast<const T*>(this->dataEntry());
 	}
-private:
-	inline typename Header::MemoryStatus memoryStatus() const
+};
+
+//收盘后存盘使用
+template<typename Header, typename T>
+class OfflineReadIterator :public MemoryIterator<Header, T>,public std::iterator<std::random_access_iterator_tag,T>
+{
+public:
+	friend class ReadSharedMemory<Header, T>;
+	using MemoryIterator<Header, T>::MemoryIterator;
+
+	inline const T& operator*() const 
 	{
-		return this->_header->status;
+		return *reinterpret_cast<const T*>(this->dataEntry());
 	}
 };
