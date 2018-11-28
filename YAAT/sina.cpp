@@ -2,20 +2,16 @@
 #include "sina.h"
 #include <boost\algorithm\string.hpp>
 
-
-using namespace std;
-using tcp = boost::asio::ip::tcp;
-namespace http = boost::beast::http;
+using namespace sina;
 
 unordered_map<string, string> SinaQuoter::_symbols;
 
-SinaQuoter::SinaQuoter() :
-	_wmem{ "sina_quotation",4096*100 }
+SinaQuoter::SinaQuoter()
 {
 	_results = _resolver.resolve(_query);
-	_request.method(http::verb::get);
-	_request.set(http::field::host, "hq.sinajs.cn");
-	_request.set(http::field::user_agent, BOOST_BEAST_VERSION_STRING);
+	_request.method(verb::get);
+	_request.set(field::host, "hq.sinajs.cn");
+	_request.set(field::user_agent, BOOST_BEAST_VERSION_STRING);
 }
 
 void SinaQuoter::subscribe(const string&  symbol)
@@ -30,32 +26,11 @@ void SinaQuoter::buildTarget()
 	_request.target(_target);
 }
 
-void SinaQuoter::writeQuotation()
+void SinaQuoter::get(response<string_body>& res)
 {
-	static auto iter = _wmem.begin();
-	static auto end = _wmem.end();
-	static int i = 0;
-	while (true)
-	{
-		boost::asio::connect(_socket, _results);
-		http::write(_socket, _request);
-		http::response<http::string_body> res;
-		http::read(_socket, _buffer, res);
-
-		SinaResponse sr{ res.body() };
-		while (!sr.eof())
-		{
-			SinaRecord record = sr.next();
-			bool r = record.parseAndWrite(&iter);
-			if (r)
-			{
-				iter.markWritten();
-				++iter;
-			}
-			if (iter == end)
-				return;
-		}
-	}
+	connect(_socket, _results);
+	write(_socket, _request);
+	read(_socket, _buffer, res);
 }
 
 std::string SinaQuoter::addPrefix(const std::string& symbol)
@@ -72,7 +47,7 @@ std::string SinaQuoter::addPrefix(const std::string& symbol)
 	}
 }
 
-inline bool SinaRecord::parseAndWrite(Quotation* q)
+bool SinaRecord::parseAndWrite(Quotation* q)
 {
 	const char* e = find(_cbegin, _cend, '=');
 	string symbol{ e - 6,e };

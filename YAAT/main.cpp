@@ -1,18 +1,33 @@
 #include "pch.h"
-#include <iostream>
-#include <fstream>
 #include "sina.h"
+#include "memory.hpp"
+#include <ctime>
 
 
-using namespace std;
+using namespace sina;
 
 int main()
 {
-	SinaQuoter q;
-	q.subscribe("600571");
-	q.subscribe("000996");
-	q.subscribe("601965");
-	q.buildTarget();
-	q.writeQuotation();
-	cout << "full" << endl;
+	SMForWrite<Header, Quotation> mem{ "sina_quotation",4096 * 100 };
+	auto begin = mem.begin();
+	auto end = mem.end();
+	SinaQuoter quoter;
+	quoter.subscribe("600571");
+	quoter.buildTarget();
+	while (begin!=end)
+	{
+		response<string_body> res;
+		quoter.get(res);
+		SinaResponse sres{ res.body() };
+		while (!sres.eof())
+		{
+			SinaRecord record =  sres.next();
+			if (record.parseAndWrite(&begin))
+			{
+				begin.markWritten();
+				++begin;
+			}
+		}
+	}
+	assert(false);
 }
